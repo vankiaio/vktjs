@@ -1,8 +1,8 @@
-⚠️ ***Important! We recently released a major breaking rewrite for eosjs. Be sure to lock your dependencies.*** ⚠️
+⚠️ ***Important! We recently released a major breaking rewrite for vktjs. Be sure to lock your dependencies.*** ⚠️
 
-If you are looking for the the previous version of `eosjs` you can [find it here](https://github.com/EOSIO/eosjs/tree/v16.0.9).
+If you are looking for the the previous version of `vktjs` you can [find it here](https://github.com/vankiaio/vktjs/tree/v16.0.9).
 
-# eosjs
+# vktjs
 
 Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
 
@@ -12,11 +12,11 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### NodeJS Dependency
 
-`npm install eosjs@beta` or `yarn add eosjs@beta`
+`npm install vktjs@beta` or `yarn add vktjs@beta`
 
 ### Browser Distribution
 
-Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
+Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://vankiaio.github.io/vktjs/guides/1.-Browsers.html).
 
 ## Import
 
@@ -24,7 +24,7 @@ Clone this repository locally then run `npm run build-web` or `yarn build-web`. 
 
 Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
 ```js
-import { Api, JsonRpc, RpcError } from 'eosjs';
+import { Api, JsonRpc, RpcError } from 'vktjs';
 
 import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
 ```
@@ -33,8 +33,8 @@ import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
 
 Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
-const { Api, JsonRpc, RpcError } = require('eosjs');
-const JsSignatureProvider = require('eosjs/dist/eosjs-jssig');  // development only
+const { Api, JsonRpc, RpcError } = require('vktjs');
+const JsSignatureProvider = require('vktjs/dist/eosjs-jssig');  // development only
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');           // node only; native TextEncoder/Decoder
 const { TextEncoder, TextDecoder } = require('text-encoding');  // React Native, IE11, and Edge Browsers only
