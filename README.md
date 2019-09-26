@@ -18,11 +18,16 @@ vktjs是访问EOS区块链的JavaScript开发包，它通过RPC API访问EOS节�
 
 在ES模块中使用import引入vktjs包，例如：
 
-import{Api,JsonRpc,RpcError}from'vktjs';importJsSignatureProviderfrom'vktjs/dist/vktjs-jssig';// development only
+import {Api,JsonRpc,RpcError} from 'vktjs';
+import JsSignatureProviderfrom 'vktjs/dist/vktjs-jssig';// development only
 
 在nodejs的commonjs模块中，使用require引入vktjs包，例如：
 
-const{Api,JsonRpc,RpcError}=require('vktjs');constJsSignatureProvider=require('vktjs/dist/vktjs-jssig');// development onlyconst fetch =require('node-fetch');// node only; not needed in browsersconst{TextEncoder,TextDecoder}=require('util');// node only; native TextEncoder/Decoder const{TextEncoder,TextDecoder}=require('text-encoding');// React Native, IE11, and Edge Browsers only
+const {Api,JsonRpc,RpcError}=require('vktjs');
+const JsSignatureProvider=require('vktjs/dist/vktjs-jssig');    // development only
+const fetch =require('node-fetch');                             // node only; not needed in browsers
+const {TextEncoder,TextDecoder}=require('util');                 // node only; native TextEncoder/Decoder 
+const {TextEncoder,TextDecoder}=require('text-encoding');        // React Native, IE11, and Edge Browsers only
 
 ### 用法概述
 
@@ -30,7 +35,8 @@ const{Api,JsonRpc,RpcError}=require('vktjs');constJsSignatureProvider=require('v
 
 vktjs中的签名提供器负责对交易进行签名。例如：
 
-const defaultPrivateKey ="5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr";// useraaaaaaaaconst signatureProvider =newJsSignatureProvider([defaultPrivateKey]);
+const defaultPrivateKey ="5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
+const signatureProvider =newJsSignatureProvider([defaultPrivateKey]);
 
 > 目前vktjs中包含的JsSignatureProvider在内存中管理私钥，在浏览器里使用 这个签名提供器是不安全的，仅限开发环境使用。
 
@@ -38,7 +44,7 @@ const defaultPrivateKey ="5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr";/
 
 JsonRpc类封装了EOS JSON-RPC调用，在Nodejs中使用时，记得设置fetch API：
 
-const rpc =newJsonRpc('http://127.0.0.1:8888',{ fetch });
+const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 
 #### API
 
@@ -46,7 +52,7 @@ const rpc =newJsonRpc('http://127.0.0.1:8888',{ fetch });
 
 Api类时，需要声明textDecoder和textEncoder：
 
-const api =newApi({ rpc, signatureProvider, textDecoder:newTextDecoder(), textEncoder:newTextEncoder()});
+const api = newApi({ rpc, signatureProvider, textDecoder:newTextDecoder(), textEncoder:newTextEncoder()});
 
 ##### 交易提交
 
@@ -56,20 +62,27 @@ Api实例的
 
 transact()方法提交一个交易到区块链上，例如：
 
-(async ()=&gt;{const result = await api.transact({
+(async () => {
+    const result = await api.transact({
     actions:[{
       account:'eosio.token',
       name:'transfer',
       authorization:[{
         actor:'useraaaaaaaa',
-        permission:'active',}],
+        permission:'active',
+      }],
       data:{from:'useraaaaaaaa',
         to:'useraaaaaaab',
         quantity:'0.0001 VKT',
-        memo:'',},}]},{
+        memo:'',
+      },
+    }]
+  }, {
     blocksBehind:3,
-    expireSeconds:30,});
-  console.dir(result);})();
+    expireSeconds:30,
+  });
+  console.dir(result);
+})();
 
 transact()的第二个参数是一个选项对象，可以包含以下字段：
 
@@ -85,7 +98,8 @@ RpcError来处理RPC错误：
 
 try{const result = await api.transact({...}catch(e){
   console.log('\nCaught exception: '+ e);if(e instanceofRpcError)
-    console.log(JSON.stringify(e.json,null,2));}
+    console.log(JSON.stringify(e.json,null,2));
+}
 
 #### 运行测试用例
 
