@@ -1,121 +1,102 @@
-⚠️ ***Important! We recently released a major breaking rewrite for vktjs. Be sure to lock your dependencies.*** ⚠️
+vktjs是访问EOS区块链的JavaScript开发包，它通过RPC API访问EOS节点， 同时包含了密钥签名、交易序列化等本地操作。
 
-If you are looking for the the previous version of `vktjs` you can [find it here](https://github.com/vankiaio/vktjs/tree/v16.0.9).
+### 安装
 
-# vktjs
+使用npm安装nodejs包：
 
-Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
+~$ npm install vktjs@beta
 
-Documentation can be found [here](https://eosio.github.io/eosjs)
+如果要在浏览器里使用vktjs，一种方法是本地构建：
 
-## Installation
+~$ git clone https://github.com/vankiaio/vktjs~$ cd vktjs
+~/vktjs$ npm install
+~/vktjs$ npm run build-web
 
-### NodeJS Dependency
+然后在~/vktjs/build-web目录下就可以找到构建好的前端js文件了。
 
-`npm install vktjs@beta` or `yarn add vktjs@beta`
+### 引入vktjs包
 
-### Browser Distribution
+在ES模块中使用import引入vktjs包，例如：
 
-Clone this repository locally then run `npm run build-web` or `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://vankiaio.github.io/vktjs/guides/1.-Browsers.html).
+import{Api,JsonRpc,RpcError}from'vktjs';importJsSignatureProviderfrom'vktjs/dist/vktjs-jssig';// development only
 
-## Import
+在nodejs的commonjs模块中，使用require引入vktjs包，例如：
 
-### ES Modules
+const{Api,JsonRpc,RpcError}=require('vktjs');constJsSignatureProvider=require('vktjs/dist/vktjs-jssig');// development onlyconst fetch =require('node-fetch');// node only; not needed in browsersconst{TextEncoder,TextDecoder}=require('util');// node only; native TextEncoder/Decoder const{TextEncoder,TextDecoder}=require('text-encoding');// React Native, IE11, and Edge Browsers only
 
-Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
-```js
-import { Api, JsonRpc, RpcError } from 'vktjs';
+### 用法概述
 
-import JsSignatureProvider from 'eosjs/dist/eosjs-jssig'; // development only
-```
+#### 签名提供器
 
-### CommonJS
+vktjs中的签名提供器负责对交易进行签名。例如：
 
-Importing using commonJS syntax is supported by NodeJS out of the box.
-```js
-const { Api, JsonRpc, RpcError } = require('vktjs');
-const JsSignatureProvider = require('vktjs/dist/eosjs-jssig');  // development only
-const fetch = require('node-fetch');                            // node only; not needed in browsers
-const { TextEncoder, TextDecoder } = require('util');           // node only; native TextEncoder/Decoder
-const { TextEncoder, TextDecoder } = require('text-encoding');  // React Native, IE11, and Edge Browsers only
-```
+const defaultPrivateKey ="5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr";// useraaaaaaaaconst signatureProvider =newJsSignatureProvider([defaultPrivateKey]);
 
-## Basic Usage
+> 目前vktjs中包含的JsSignatureProvider在内存中管理私钥，在浏览器里使用 这个签名提供器是不安全的，仅限开发环境使用。
 
-### Signature Provider
+#### JSON-RPC调用
 
-The Signature Provider holds private keys and is responsible for signing transactions.
+JsonRpc类封装了EOS JSON-RPC调用，在Nodejs中使用时，记得设置fetch API：
 
-***Using the JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
+const rpc =newJsonRpc('http://127.0.0.1:8888',{ fetch });
 
-```js
-const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa
-const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
-```
+#### API
 
-### JSON-RPC
+在浏览器中使用
 
-Open a connection to JSON-RPC, include `fetch` when on NodeJS.
-```js
-const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
-```
+Api类时，需要声明textDecoder和textEncoder：
 
-### API
+const api =newApi({ rpc, signatureProvider, textDecoder:newTextDecoder(), textEncoder:newTextEncoder()});
 
-Include textDecoder and textEncoder when using in browser.
-```js
-const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
-```
+##### 交易提交
 
-### Sending a transaction
+使用
 
-`transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
+Api实例的
 
-```js
-(async () => {
-  const result = await api.transact({
-    actions: [{
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-        actor: 'useraaaaaaaa',
-        permission: 'active',
-      }],
-      data: {
-        from: 'useraaaaaaaa',
-        to: 'useraaaaaaab',
-        quantity: '0.0001 SYS',
-        memo: '',
-      },
-    }]
-  }, {
-    blocksBehind: 3,
-    expireSeconds: 30,
-  });
-  console.dir(result);
-})();
-```
+transact()方法提交一个交易到区块链上，例如：
 
-### Error handling
+(async ()=&gt;{const result = await api.transact({
+    actions:[{
+      account:'eosio.token',
+      name:'transfer',
+      authorization:[{
+        actor:'useraaaaaaaa',
+        permission:'active',}],
+      data:{from:'useraaaaaaaa',
+        to:'useraaaaaaab',
+        quantity:'0.0001 VKT',
+        memo:'',},}]},{
+    blocksBehind:3,
+    expireSeconds:30,});
+  console.dir(result);})();
 
-use `RpcError` for handling RPC Errors
-```js
-...
-try {
-  const result = await api.transact({
-  ...
-} catch (e) {
-  console.log('\nCaught exception: ' + e);
-  if (e instanceof RpcError)
-    console.log(JSON.stringify(e.json, null, 2));
-}
-...
-```
+transact()的第二个参数是一个选项对象，可以包含以下字段：
 
-## Running Tests
+- broadcast：是否广播交易，默认值：true
+- blocksBehind：TAPOS字段，节点用来判断交易是否超时
+- expiresSeconds：TAPOS字段，节点用来判断交易是否超时
 
-### Automated Unit Test Suite
-`npm run test` or `yarn test`
+##### 错误处理
 
-### Web Integration Test Suite
-Run `npm run build-web` to build the browser distrubution then open `src/tests/web.html` in the browser of your choice.  The file should run through 6 tests, relaying the results onto the webpage with a 2 second delay after each test.  The final 2 tests should relay the exceptions being thrown onto the webpage for an invalid transaction and invalid rpc call.
+使用
+
+RpcError来处理RPC错误：
+
+try{const result = await api.transact({...}catch(e){
+  console.log('\nCaught exception: '+ e);if(e instanceofRpcError)
+    console.log(JSON.stringify(e.json,null,2));}
+
+#### 运行测试用例
+
+自动化单元测试：
+
+~/vktjs$ npm run test or yarn test
+
+web集成测试：
+
+首先执行
+
+npm run build-web ，然后打开
+
+src/tests/web.html运行web集成测试。
