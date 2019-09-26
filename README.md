@@ -1,4 +1,4 @@
-vktjs是访问EOS区块链的JavaScript开发包，它通过RPC API访问EOS节点， 同时包含了密钥签名、交易序列化等本地操作。
+vktjs是访问VKT区块链的JavaScript开发包，它通过RPC API访问VKT节点， 同时包含了密钥签名、交易序列化等本地操作。
 
 ### 安装
 
@@ -42,7 +42,7 @@ const signatureProvider =newJsSignatureProvider([defaultPrivateKey]);
 
 #### JSON-RPC调用
 
-JsonRpc类封装了EOS JSON-RPC调用，在Nodejs中使用时，记得设置fetch API：
+JsonRpc类封装了VKT JSON-RPC调用，在Nodejs中使用时，记得设置fetch API：
 
 const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 
@@ -65,7 +65,7 @@ transact()方法提交一个交易到区块链上，例如：
 (async () => {
     const result = await api.transact({
     actions:[{
-      account:'eosio.token',
+      account:'VKTio.token',
       name:'transfer',
       authorization:[{
         actor:'useraaaaaaaa',
