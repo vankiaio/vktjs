@@ -1,7 +1,7 @@
 {
-  "name": "eosjs",
+  "name": "vktjs",
   "version": "20.0.3",
-  "description": "Talk to eos API",
+  "description": "Talk to vkt API",
   "main": "dist/index.js",
   "scripts": {
     "cypress": "./scripts/run-cypress.sh",
@@ -25,11 +25,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/EOSIO/eosjs.git"
+    "url": "https://github.com/vankiaio/vktjs.git"
   },
   "dependencies": {
     "babel-runtime": "6.26.0",
-    "eosjs-ecc": "4.0.7",
+    "vktjs-ecc": "4.0.7",
     "text-encoding": "0.7.0"
   },
   "devDependencies": {

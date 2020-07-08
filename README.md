@@ -1,126 +1,119 @@
-# eosjs ![npm](https://img.shields.io/npm/dw/eosjs.svg)
+vktjs是访问VKT区块链的JavaScript开发包，它通过RPC API访问VKT节点， 同时包含了密钥签名、交易序列化等本地操作。
 
-Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
+### 安装
 
-Documentation can be found [here](https://eosio.github.io/eosjs)
+使用npm安装nodejs包：
 
-## Installation
+~$ npm install vktjs@beta
 
-### NPM
+如果要在浏览器里使用vktjs，一种方法是本地构建：
 
-The official distribution package can be found at [npm](https://www.npmjs.com/package/eosjs).
+~$ git clone https://github.com/vankiaio/vktjs~$  
+cd vktjs  
+~/vktjs$ npm install  
+~/vktjs$ npm run build-web  
 
-### Add dependency to your project
+然后在~/vktjs/build-web目录下就可以找到构建好的前端js文件了。
 
-`yarn add eosjs`
+### 引入vktjs包
 
-### Browser Distribution
+在ES模块中使用import引入vktjs包，例如：
 
-Clone this repository locally then run `yarn build-web`.  The browser distribution will be located in `dist-web` and can be directly copied into your project repository. The `dist-web` folder contains minified bundles ready for production, along with source mapped versions of the library for debugging.  For full browser usage examples, [see the documentation](https://eosio.github.io/eosjs/guides/1.-Browsers.html).
+import {Api,JsonRpc,RpcError} from 'vktjs';  
+import JsSignatureProviderfrom 'vktjs/dist/vktjs-jssig';// development only  
 
-## Import
+在nodejs的commonjs模块中，使用require引入vktjs包，例如：  
 
-### ES Modules
+const {Api,JsonRpc,RpcError}=require('vktjs');  
+const JsSignatureProvider=require('vktjs/dist/vktjs-jssig');    // development only  
+const fetch =require('node-fetch');                             // node only; not needed in browsers  
+const {TextEncoder,TextDecoder}=require('util');                 // node only; native TextEncoder/Decoder  
+const {TextEncoder,TextDecoder}=require('text-encoding');        // React Native, IE11, and Edge Browsers only  
 
-Importing using ESM syntax is supported using TypeScript, [webpack](https://webpack.js.org/api/module-methods), or  [Node.js with `--experimental-modules` flag](https://nodejs.org/api/esm.html)
-```js
-import { Api, JsonRpc, RpcError } from 'eosjs';
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // development only
-```
 
-### CommonJS
+### 用法概述
 
-Importing using commonJS syntax is supported by Node.js out of the box.
-```js
-const { Api, JsonRpc, RpcError } = require('eosjs');
-const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
-const fetch = require('node-fetch');                                    // node only; not needed in browsers
-const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
-const { TextEncoder, TextDecoder } = require('text-encoding');          // React Native, IE11, and Edge Browsers only
-```
+#### 签名提供器
 
-## Basic Usage
+vktjs中的签名提供器负责对交易进行签名。例如：
 
-### Signature Provider
+const defaultPrivateKey ="5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // useraaaaaaaa  
 
-The Signature Provider holds private keys and is responsible for signing transactions.
+const signatureProvider =newJsSignatureProvider([defaultPrivateKey]);  
 
-***Using the JsSignatureProvider in the browser is not secure and should only be used for development purposes. Use a secure vault outside of the context of the webpage to ensure security when signing transactions in production***
+> 目前vktjs中包含的JsSignatureProvider在内存中管理私钥，在浏览器里使用 这个签名提供器是不安全的，仅限开发环境使用。
 
-```js
-const defaultPrivateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr"; // bob
-const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
-```
+#### JSON-RPC调用
 
-### JSON-RPC
+JsonRpc类封装了VKT JSON-RPC调用，在Nodejs中使用时，记得设置fetch API：
 
-Open a connection to JSON-RPC, include `fetch` when on Node.js.
-```js
 const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
-```
 
-### API
+#### API
 
-Include textDecoder and textEncoder when using in Node, React Native, IE11 or Edge Browsers.
-```js
-const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
-```
+在浏览器中使用
 
-### Sending a transaction
+Api类时，需要声明textDecoder和textEncoder：
 
-`transact()` is used to sign and push transactions onto the blockchain with an optional configuration object parameter.  This parameter can override the default value of `broadcast: true`, and can be used to fill TAPOS fields given `blocksBehind` and `expireSeconds`.  Given no configuration options, transactions are expected to be unpacked with TAPOS fields (`expiration`, `ref_block_num`, `ref_block_prefix`) and will automatically be broadcast onto the chain.
+const api = newApi({ rpc, signatureProvider, textDecoder:newTextDecoder(), textEncoder:newTextEncoder()});
 
-```js
-(async () => {
-  const result = await api.transact({
-    actions: [{
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-        actor: 'useraaaaaaaa',
-        permission: 'active',
-      }],
-      data: {
-        from: 'useraaaaaaaa',
-        to: 'useraaaaaaab',
-        quantity: '0.0001 SYS',
-        memo: '',
-      },
-    }]
-  }, {
-    blocksBehind: 3,
-    expireSeconds: 30,
-  });
-  console.dir(result);
-})();
-```
+##### 交易提交
 
-### Error handling
+使用
 
-use `RpcError` for handling RPC Errors
-```js
-...
-try {
-  const result = await api.transact({
-  ...
-} catch (e) {
-  console.log('\nCaught exception: ' + e);
-  if (e instanceof RpcError)
-    console.log(JSON.stringify(e.json, null, 2));
-}
-...
-```
+Api实例的
 
-## Contributing
+transact()方法提交一个交易到区块链上，例如：
 
-[Contributing Guide](./CONTRIBUTING.md)
+(async () => {  
+    const result = await api.transact({  
+    actions:[{  
+      account:'VKTio.token',  
+      name:'transfer',  
+      authorization:[{  
+        actor:'useraaaaaaaa',  
+        permission:'active',  
+      }],  
+      data:{from:'useraaaaaaaa',  
+        to:'useraaaaaaab',  
+        quantity:'0.0001 VKT',  
+        memo:'',  
+      },  
+    }]  
+  }, {  
+    blocksBehind:3,  
+    expireSeconds:30,  
+  });  
+  console.dir(result);  
+})();  
 
-[Code of Conduct](./CONTRIBUTING.md#conduct)
+transact()的第二个参数是一个选项对象，可以包含以下字段：
 
-## License
+- broadcast：是否广播交易，默认值：true
+- blocksBehind：TAPOS字段，节点用来判断交易是否超时
+- expiresSeconds：TAPOS字段，节点用来判断交易是否超时
 
-[MIT](./LICENSE)
+##### 错误处理
 
-## Important
+使用
 
-See LICENSE for copyright and license terms.  Block.one makes its contribution on a voluntary basis as a member of the EOSIO community and is not responsible for ensuring the overall performance of the software or any related applications.  We make no representation, warranty, guarantee or undertaking in respect of the software or any related documentation, whether expressed or implied, including but not limited to the warranties or merchantability, fitness for a particular purpose and noninfringement. In no event shall we be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or documentation or the use or other dealings in the software or documentation.  Any test results or performance figures are indicative and will not reflect performance under all conditions.  Any reference to any third party or third-party product, service or other resource is not an endorsement or recommendation by Block.one.  We are not responsible, and disclaim any and all responsibility and liability, for your use of or reliance on any of these resources. Third-party resources may be updated, changed or terminated at any time, so the information here may be out of date or inaccurate.
+RpcError来处理RPC错误：
+
+try{const result = await api.transact({...}catch(e){  
+  console.log('\nCaught exception: '+ e);if(e instanceofRpcError)  
+    console.log(JSON.stringify(e.json,null,2));  
+}  
+
+#### 运行测试用例
+
+自动化单元测试：
+
+~/vktjs$ npm run test or yarn test  
+
+web集成测试：
+
+首先执行
+
+npm run build-web ，然后打开
+
+src/tests/web.html运行web集成测试。
