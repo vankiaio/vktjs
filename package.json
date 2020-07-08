@@ -1,6 +1,6 @@
 {
   "name": "vktjs",
-  "version": "20.0.3",
+  "version": "20.0.2",
   "description": "Talk to vkt API",
   "main": "dist/index.js",
   "scripts": {
